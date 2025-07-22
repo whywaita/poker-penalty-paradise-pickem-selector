@@ -19,7 +19,7 @@ func main() {
 		os.Exit(1)
 	}
 	start := time.Now()
-	best, eqs := poker.PickBestGame(hand, 20000) // 20k sims per game ≈200‑300 ms
+	best, eqs := poker.PickBestGame(hand, 100000) // 100k sims per game for better accuracy
 	dur := time.Since(start)
 
 	fmt.Printf("Hand: %s %s %s %s\n", hand[0], hand[1], hand[2], hand[3])
