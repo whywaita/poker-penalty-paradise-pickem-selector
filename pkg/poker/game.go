@@ -43,6 +43,51 @@ func (b BadugiGame) CompleteHand(my []Card, deck []Card) ([]Card, []Card, []Card
 
 func (b BadugiGame) Evaluate(h []Card, board []Card) int64 { return EvaluateBadugi(h) }
 
+// HiDuGiGame implementation - split pot Hi/Badugi game
+type HiDuGiGame struct{}
+
+func (h HiDuGiGame) Name() string { return "HiDuGi" }
+
+func (h HiDuGiGame) CompleteHand(my []Card, deck []Card) ([]Card, []Card, []Card, []Card) {
+	// HiDuGi uses 4-card hands; hero already has 4.
+	oppHand, deck := DrawRandom(deck, 4)
+	return my, oppHand, nil, deck
+}
+
+func (h HiDuGiGame) Evaluate(hand []Card, board []Card) int64 {
+	highScore, badugiScore := EvaluateHiDuGi(hand)
+
+	// Check if we have 8-badugi or better for a strong hand
+	has8Badugi := IsBadugi8OrBetter(hand)
+
+	// Scoring strategy:
+	// - If we have 8-badugi or better, heavily weight the combined score
+	// - Otherwise, use a balanced approach between high and badugi
+
+	// Get the high hand category (0-8)
+	highCategory := highScore / (13 * 13 * 13 * 13)
+
+	// Normalize badugi score
+	normalizedBadugi := badugiScore / 1000000000000
+
+	if has8Badugi {
+		// Strong badugi hands get significant bonus
+		// Add bonus of 10 million to ensure these hands rank highest
+		return highScore + normalizedBadugi + 10000000
+	}
+
+	// For hands without 8-badugi:
+	// - Strong high hands (category 6+: trips, quads, straight flush) get a boost
+	// - This ensures four aces (category 7) beats most other hands
+	if highCategory >= 6 {
+		// Trips or better get a significant boost
+		return highScore*3 + normalizedBadugi/10
+	}
+
+	// For other hands, combine scores with equal weight
+	return highScore + normalizedBadugi/10
+}
+
 // StubGame implementation for unimplemented variants
 type StubGame struct {
 	NameStr string

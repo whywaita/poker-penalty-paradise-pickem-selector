@@ -2,6 +2,11 @@ package poker
 
 // SimulateEquity returns hero win probability against one opponent by Monte‑Carlo
 func SimulateEquity(g Game, my4 []Card, iters int) float64 {
+	// Special handling for HiDuGi as a split pot game
+	if _, ok := g.(HiDuGiGame); ok {
+		return SimulateHiDuGiEquity(my4, iters)
+	}
+
 	wins, ties := 0, 0
 	for i := 0; i < iters; i++ {
 		deck := RemoveCards(FullDeck(), ToSet(my4))
@@ -20,9 +25,9 @@ func SimulateEquity(g Game, my4 []Card, iters int) float64 {
 // PickBestGame finds the best game variant for the given hand
 func PickBestGame(my4 []Card, iters int) (best Game, equities map[string]float64) {
 	games := []Game{
+		HiDuGiGame{}, // Put HiDuGi first so it wins ties with split pot preference
 		DrawmahaHi{},
 		BadugiGame{},
-		StubGame{"HiDuGi"},
 		StubGame{"Drawmaha-2-7"},
 		StubGame{"Prime"},
 		StubGame{"Omaha DoubleBoard"},

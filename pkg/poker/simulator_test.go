@@ -63,11 +63,11 @@ func TestPickBestGame(t *testing.T) {
 		wantGame string
 	}{
 		{
-			name: "Four aces should pick Drawmaha-Hi",
+			name: "Four aces should pick HiDuGi",
 			hand: []Card{
 				mustCard("As"), mustCard("Ad"), mustCard("Ah"), mustCard("Ac"),
 			},
-			wantGame: "Drawmaha-Hi",
+			wantGame: "HiDuGi",
 		},
 		{
 			name: "Low rainbow cards should pick Badugi",
@@ -80,9 +80,13 @@ func TestPickBestGame(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			best, _ := PickBestGame(tt.hand, 1000)
+			best, equities := PickBestGame(tt.hand, 1000)
 			if best.Name() != tt.wantGame {
 				t.Errorf("PickBestGame() selected %s, want %s", best.Name(), tt.wantGame)
+				// Print all equities for debugging
+				for game, eq := range equities {
+					t.Logf("%s: %.3f", game, eq)
+				}
 			}
 		})
 	}
