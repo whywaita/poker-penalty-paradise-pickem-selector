@@ -112,3 +112,13 @@ func LoadBadugiRanking(filename string) (BadugiRanking, error) {
 	}
 	return ranking, nil
 }
+
+func changeForBadugi(my4 []Card, opp4 []Card) ([]Card, []Card) {
+	if my4 != nil {
+	}
+	if opp4 != nil {
+	}
+	my4Final := []Card{0, 5, 10, 15}
+	opp4Final := []Card{4, 9, 14, 19}
+	return my4Final, opp4Final
+}
