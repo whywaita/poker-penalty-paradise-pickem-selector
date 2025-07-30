@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// Cardが現在の定義では正しく動かない点に注意
+// CardをA始まりで定義し直せばOK
 func SimulateBadugiEquity(my4 []Card, iters int) float64 {
 	potWins := 0.0
 
