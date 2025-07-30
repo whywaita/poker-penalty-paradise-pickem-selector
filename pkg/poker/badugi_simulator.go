@@ -1,7 +1,6 @@
 package poker
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
@@ -19,8 +18,8 @@ func SimulateBadugiEquity(my4 []Card, iters int) float64 {
 
 		my4Final, opp4Final := changeForBadugi(my4, opp4)
 
-		rankMy4Final, _ := GetBadugiRank(my4Final)
-		rankOpp4Final, _ := GetBadugiRank(opp4Final)
+		rankMy4Final := GetBadugiRank(my4Final)
+		rankOpp4Final := GetBadugiRank(opp4Final)
 
 		if rankMy4Final < rankOpp4Final {
 			potWins += 1.0
@@ -33,30 +32,20 @@ func SimulateBadugiEquity(my4 []Card, iters int) float64 {
 	return equity
 }
 
-func GetBadugiRank(cards []Card) (int, error) {
-	c, err := ExtractValidBadugiCards(cards)
-	if err != nil {
-		return 0, err
-	}
+func GetBadugiRank(cards []Card) int {
+	c := ExtractValidBadugiCards(cards)
 
-	key, err := cardsToBadugiKey(c)
-	if err != nil {
-		return 0, err
-	}
+	key := cardsToBadugiKey(c)
 
 	rank, ok := BadugiRanking[key]
 	if !ok {
-		return 0, fmt.Errorf("hand %v (key: %s) not found in ranking", cards, key)
+		return 0
 	}
-	return rank, nil
+	return rank
 }
 
 // for GetBadugiRank() & changeForBadugi()
-func ExtractValidBadugiCards(cards []Card) ([]Card, error) {
-	if len(cards) != 4 {
-		return nil, fmt.Errorf("need 4 cards, got %d", len(cards))
-	}
-
+func ExtractValidBadugiCards(cards []Card) []Card {
 	sort.Slice(cards, func(i, j int) bool {
 		return cards[i].Rank() < cards[j].Rank()
 	})
@@ -78,22 +67,19 @@ func ExtractValidBadugiCards(cards []Card) ([]Card, error) {
 		valid = append(valid, c)
 	}
 
-	return valid, nil
+	return valid
 }
 
 // for GetBadugiRank()
-func cardsToBadugiKey(cards []Card) (string, error) {
-	valid, err := ExtractValidBadugiCards(cards)
-	if err != nil {
-		return "", err
-	}
+func cardsToBadugiKey(cards []Card) string {
+	valid := ExtractValidBadugiCards(cards)
 
 	var parts []string
 	for _, c := range valid {
 		parts = append(parts, rankToChar[c.Rank()])
 	}
 
-	return strings.Join(parts, ""), nil
+	return strings.Join(parts, "")
 }
 
 func changeForBadugi(my4 []Card, opp4 []Card) ([]Card, []Card) {
@@ -103,8 +89,8 @@ func changeForBadugi(my4 []Card, opp4 []Card) ([]Card, []Card) {
 
 	for round := 0; round < 3; round++ {
 		// 自分と相手の有効カード（バドゥギ構成）を抽出
-		myValid, _ := ExtractValidBadugiCards(my4)
-		oppValid, _ := ExtractValidBadugiCards(opp4)
+		myValid := ExtractValidBadugiCards(my4)
+		oppValid := ExtractValidBadugiCards(opp4)
 
 		if len(myValid) < 4 {
 			my4 = doChange(my4, myValid, &deck)
