@@ -95,13 +95,44 @@ func cardsToBadugiKey(cards []Card) (string, error) {
 }
 
 func changeForBadugi(my4 []Card, opp4 []Card) ([]Card, []Card) {
-	if my4 != nil {
+	// 使用カードを除いてデッキ構築
+	used := ToSet(append(my4, opp4...))
+	deck := RemoveCards(FullDeck(), used)
+
+	for round := 0; round < 3; round++ {
+		// 自分と相手の有効カード（バドゥギ構成）を抽出
+		myValid, _ := ExtractValidBadugiCards(my4)
+		oppValid, _ := ExtractValidBadugiCards(opp4)
+
+		if len(myValid) < 4 {
+			my4 = doChange(my4, myValid, &deck)
+		}
+		if len(oppValid) < 4 {
+			opp4 = doChange(opp4, oppValid, &deck)
+		}
 	}
-	if opp4 != nil {
+
+	return my4, opp4
+}
+
+func doChange(hand []Card, valid []Card, deck *[]Card) []Card {
+	// 現在の手札をセットで扱って交換対象を抽出
+	validSet := ToSet(valid)
+	var toChange []Card
+	for _, c := range hand {
+		if _, ok := validSet[c]; !ok {
+			toChange = append(toChange, c)
+		}
 	}
-	my4Final := []Card{0, 5, 10, 15}
-	opp4Final := []Card{4, 9, 14, 19}
-	return my4Final, opp4Final
+
+	// 新しいカードを引く
+	newCards, rest := DrawRandom(*deck, len(toChange))
+	*deck = rest
+
+	// 新旧手札を統合
+	var newHand []Card
+	newHand = append(valid, newCards...)
+	return newHand
 }
 
 var BadugiRanking = map[string]int{
